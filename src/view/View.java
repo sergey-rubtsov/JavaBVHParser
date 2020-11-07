@@ -5,6 +5,8 @@ import br.ol.animation.bvh.Skeleton;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.io.File;
+import java.net.URISyntaxException;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.JFrame;
@@ -18,13 +20,18 @@ import javax.swing.SwingUtilities;
  */
 public class View extends JPanel {
     
-    private Skeleton skeleton;
+    private final Skeleton skeleton;
     
     private double frameIndex;
+
+    private int animation = 0;
+
+    File[] listOfFiles;
     
-    public View() {
-        skeleton = new Skeleton("dancing.bvh");
-        
+    public View() throws URISyntaxException {
+        skeleton = new Skeleton("dog/D1_003_KAN01_001.bvh");
+        File folder = new File(getClass().getResource("/res/dog/").toURI());
+        listOfFiles = folder.listFiles();
         new Timer().scheduleAtFixedRate(new TimerTask() {
 
             @Override
@@ -32,7 +39,7 @@ public class View extends JPanel {
                 update();
                 repaint();
             }
-        }, 100, 1000 / 30);
+        }, 10, 100 / 30);
     }
     
     private void update() {
@@ -41,6 +48,11 @@ public class View extends JPanel {
         frameIndex += 1;
         if (frameIndex > skeleton.getFrameSize() - 1) {
             frameIndex = 0;
+            animation++;
+            if (animation > listOfFiles.length - 1) {
+                animation = 0;
+            }
+            skeleton.parseMotion("dog/" + listOfFiles[animation].getName());
         }
     }
 
@@ -50,7 +62,7 @@ public class View extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
         g2d.translate(getWidth() / 2, getHeight() / 2);
         
-        double scale = 10;
+        double scale = 1;
         
         for (int n = 0; n < skeleton.getNodes().size(); n++) {
             Node node = skeleton.getNodes().get(n);
@@ -74,14 +86,18 @@ public class View extends JPanel {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                View view = new View();
-                JFrame frame = new JFrame();
-                frame.setSize(800, 600);
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setLocationRelativeTo(null);
-                frame.getContentPane().add(view);
-                frame.setVisible(true);
-                view.requestFocus();
+                try {
+                    View view = new View();
+                    JFrame frame = new JFrame();
+                    frame.setSize(800, 600);
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    frame.setLocationRelativeTo(null);
+                    frame.getContentPane().add(view);
+                    frame.setVisible(true);
+                    view.requestFocus();
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }

@@ -13,9 +13,16 @@ public class Skeleton {
     private Node rootNode;
     private Motion motion;
     private final List<Node> nodes = new ArrayList<Node>();
+    Parser parser = new Parser();
 
     public Skeleton(String resource) {
-        Parser parser = new Parser();
+        parser.load(resource);
+        rootNode = new Node(parser);
+        motion = new Motion(parser);
+        rootNode.fillNodesList(nodes);
+    }
+
+    public void parseMotion(String resource) {
         parser.load(resource);
         rootNode = new Node(parser);
         motion = new Motion(parser);
